@@ -1,7 +1,3 @@
-Here's a clear and beginner-friendly **`README.md`** for your **ConversiDoc** project:
-
----
-
 # 📄 ConversiDoc - Chat with Your PDFs using OpenAI and LangChain
 
 ConversiDoc is a simple Streamlit application that allows you to upload PDF documents and interact with their contents using natural language. Powered by OpenAI's GPT-4o-mini model and LangChain, it extracts, embeds, and retrieves information from your documents to answer your questions.
@@ -119,7 +115,3 @@ This project is open-source and free to use under the [MIT License](LICENSE).
 * [Streamlit](https://streamlit.io)
 * [OpenAI](https://openai.com/)
 * [ChromaDB](https://www.trychroma.com/)
-
----
-
-Let me know if you'd like me to generate the `requirements.txt` as well.
