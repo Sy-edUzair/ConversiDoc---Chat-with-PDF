@@ -1,8 +1,8 @@
 import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain_community.vectorstores import FAISS
@@ -11,6 +11,9 @@ import os
 
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise EnvironmentError("OpenAI API key not found. Please check your .env file.")
+
 
 def load_pdf(docs):
     text = ""
@@ -27,17 +30,12 @@ def get_chunks(text):
     chunks = splitter.split_text(text)
     return chunks
 
-def create_db(chunks):
+def get_conversational_chain_from_chunks(chunks):
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     vector_store = FAISS.from_texts(chunks, embeddings)
-    vector_store.save_local("faiss_index")
 
-def get_conversational_chain():
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2, openai_api_key=openai_api_key)
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, output_key="answer")
-
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    vector_store = FAISS.load_local("faiss_index", embeddings)
 
     chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
@@ -51,9 +49,6 @@ def get_conversational_chain():
 def main():
     st.set_page_config("ConversiDoc")
     st.header("ConversiDoc💬📄")
-
-    if "qa_chain" not in st.session_state and os.path.exists("faiss_index"):
-        st.session_state.qa_chain = get_conversational_chain()
 
     query = st.text_input("Ask a question based on the uploaded PDFs:")
 
@@ -69,9 +64,8 @@ def main():
                 with st.spinner("Processing..."):
                     raw_text = load_pdf(pdf_docs)
                     text_chunks = get_chunks(raw_text)
-                    create_db(text_chunks)
-                    st.session_state.qa_chain = get_conversational_chain()
-                    st.success("Processing complete!")
+                    st.session_state.qa_chain = get_conversational_chain_from_chunks(text_chunks)
+                    st.success("Processing complete! You can now ask questions.")
             else:
                 st.warning("Please upload at least one PDF.")
 
