@@ -29,7 +29,6 @@ def get_chunks(text):
 
 def get_conversational_chain_from_chunks(chunks):
     openai_api_key = os.getenv("OPENAI_API_KEY")
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
     if not openai_api_key:
         raise EnvironmentError("OpenAI API key not found. Please check your .env file.")
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
